@@ -1,4 +1,4 @@
-# Stimson_scraper
+# Brookings_scraper
 
 미국의 싱크탱크 브루킹스 연구소(The Brookings Institution, https://www.brookings.edu)의 자료들을 받아오는 크롤러입니다. 브루킹스 연구소내의 4가지 자료들(Blog post, Testimonies, Reserch paper, Brookings papers on economy activity article)들에 대한 자료를 받아옵니다.
 
