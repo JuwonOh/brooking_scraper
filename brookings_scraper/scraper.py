@@ -1,5 +1,6 @@
 import re
 import time
+from dateutil.parser import parse
 from .parser import parse_page
 from .utils import get_soup
 from .utils import news_dateformat
@@ -14,7 +15,7 @@ def is_matched(url):
 
 patterns = [
     re.compile('https://www.brookings.edu/[\w]+')]
-url_blog = 'https://www.brookings.edu/search/page/{}?post_type=post&orderby=relevance/'
+url_blog = 'https://www.brookings.edu/search/page/{}?post_type=post&orderby=relevance'
 
 def yield_latest_blog(begin_date, max_num=10, sleep=1.0):
     """
@@ -33,7 +34,7 @@ def yield_latest_blog(begin_date, max_num=10, sleep=1.0):
     """
 
     # prepare parameters
-    d_begin = strf_to_datetime(begin_date, user_dateformat)
+    d_begin = parse(begin_date)
     end_page = 72
     n_news = 0
     outdate = False
@@ -59,15 +60,18 @@ def yield_latest_blog(begin_date, max_num=10, sleep=1.0):
             news_json = parse_page(url)
 
             # check date
-            d_news = strf_to_datetime(news_json['date'], news_dateformat)
-            if d_begin > d_news:
-                outdate = True
-                print('Stop scrapping. {} / {} blog was scrapped'.format(n_news, max_num))
-                print('The oldest blog article has been created after {}'.format(begin_date))
-                break
+            if news_json is not None:
+                d_news = news_json['date']
+                if d_begin > d_news:
+                    outdate = True
+                    print('Stop scrapping. {} / {} blog was scrapped'.format(n_news, max_num))
+                    print('The oldest blog article has been created after {}'.format(begin_date))
+                    break
 
-            # yield
-            yield news_json
+                # yield
+                yield news_json
+            else:
+                continue
 
             # check number of scraped news
             n_news += 1
@@ -122,7 +126,7 @@ def yield_latest_testimony(begin_date, max_num=10, sleep=1.0):
     """
 
     # prepare parameters
-    d_begin = strf_to_datetime(begin_date, user_dateformat)
+    d_begin = parse(begin_date)
     end_page = 72
     n_news = 0
     outdate = False
@@ -144,19 +148,19 @@ def yield_latest_testimony(begin_date, max_num=10, sleep=1.0):
 
         # scrap
         for url in links_all:
-
             news_json = parse_page(url)
+            if news_json is not None:
+                d_news = news_json['date']
+                if d_begin > d_news:
+                    outdate = True
+                    print('Stop scrapping. {} / {} blog was scrapped'.format(n_news, max_num))
+                    print('The oldest testimony article has been created after {}'.format(begin_date))
+                    break
 
-            # check date
-            d_news = strf_to_datetime(news_json['date'], news_dateformat)
-            if d_begin > d_news:
-                outdate = True
-                print('Stop scrapping. {} / {} testimony was scrapped'.format(n_news, max_num))
-                print('The oldest testimony article has been created after {}'.format(begin_date))
-                break
-
-            # yield
-            yield news_json
+                # yield
+                yield news_json
+            else:
+                continue
 
             # check number of scraped news
             n_news += 1
@@ -211,7 +215,7 @@ def yield_latest_bpea(begin_date, max_num=10, sleep=1.0):
     """
 
     # prepare parameters
-    d_begin = strf_to_datetime(begin_date, user_dateformat)
+    d_begin = parse(begin_date)
     end_page = 72
     n_news = 0
     outdate = False
@@ -233,19 +237,19 @@ def yield_latest_bpea(begin_date, max_num=10, sleep=1.0):
 
         # scrap
         for url in links_all:
-
             news_json = parse_page(url)
+            if news_json is not None:
+                d_news = news_json['date']
+                if d_begin > d_news:
+                    outdate = True
+                    print('Stop scrapping. {} / {} blog was scrapped'.format(n_news, max_num))
+                    print('The oldest brookins economic articles has been created after {}'.format(begin_date))
+                    break
 
-            # check date
-            d_news = strf_to_datetime(news_json['date'], news_dateformat)
-            if d_begin > d_news:
-                outdate = True
-                print('Stop scrapping. {} / {} bpea was scrapped'.format(n_news, max_num))
-                print('The oldest bpea article has been created after {}'.format(begin_date))
-                break
-
-            # yield
-            yield news_json
+                # yield
+                yield news_json
+            else:
+                continue
 
             # check number of scraped news
             n_news += 1
@@ -300,7 +304,7 @@ def yield_latest_research(begin_date, max_num=10, sleep=1.0):
     """
 
     # prepare parameters
-    d_begin = strf_to_datetime(begin_date, user_dateformat)
+    d_begin = parse(begin_date)
     end_page = 72
     n_news = 0
     outdate = False
@@ -324,18 +328,18 @@ def yield_latest_research(begin_date, max_num=10, sleep=1.0):
         for url in links_all:
 
             news_json = parse_page(url)
+            if news_json is not None:
+                d_news = news_json['date']
+                if d_begin > d_news:
+                    outdate = True
+                    print('Stop scrapping. {} / {} blog was scrapped'.format(n_news, max_num))
+                    print('The oldest reserch article has been created after {}'.format(begin_date))
+                    break
 
-            # check date
-            d_news = strf_to_datetime(news_json['date'], news_dateformat)
-            if d_begin > d_news:
-                outdate = True
-                print('Stop scrapping. {} / {} research was scrapped'.format(n_news, max_num))
-                print('The oldest research article has been created after {}'.format(begin_date))
-                break
-
-            # yield
-            yield news_json
-
+                # yield
+                yield news_json
+            else:
+                continue
             # check number of scraped news
             n_news += 1
             if n_news >= max_num:

@@ -6,7 +6,7 @@ from datetime import datetime
 from time import gmtime, strftime
 
 
-news_dateformat = '%A, %B %d, %Y'
+news_dateformat = '%Y-%m-%d'
 user_dateformat = '%Y-%m-%d'
 
 def now():
