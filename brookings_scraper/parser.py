@@ -1,41 +1,62 @@
 from .utils import get_soup
 from .utils import now
-
+from dateutil.parser import parse
 def parse_page(url):
-    if '/blog/' in url:
-        return parse_blog(url)
-    if '/research/' in url:
-        return parse_report(url)
-    if '/testimonies/' in url:
-        return parse_testimony(url)
-    if '/bpea-articles/' in url:
-        return parse_bpea(url)
-    return None
+    """
+    Argument
+    --------
+    url : str
+        Web page url
+
+    Returns
+    -------
+    json_object : dict
+        JSON format web page contents
+        It consists with
+            title : article title
+            time : article written time
+            content : text with line separator \\n
+            url : web page url
+            scrap_time : scrapped time
+    """
+    try:
+        if '/blog/' in url:
+            return parse_blog(url)
+        if '/research/' in url:
+            return parse_report(url)
+        if '/testimonies/' in url:
+            return parse_testimony(url)
+        if '/bpea-articles/' in url:
+            return parse_bpea(url)
+    except Exception as e:
+        print(e)
+        print('Parsing error from {}'.format(url))
+        return None
 
 def parse_blog(url):
     def parse_author(soup):
-        author = soup.find('h2', class_='name').find('span', itemprop='name').text
+        author = soup.find('h2', class_='name')
         if not author:
-            return ''
-        return author
+            return 'no name'
+        return author.find('span', itemprop='name').text
 
     def parse_title(soup):
-        title = soup.find('h1', class_='report-title').text
+        title = soup.find('h1', class_='report-title')
         if not title:
             return ''
-        return title
+        return title.text
 
     def parse_date(soup):
-        date = soup.find('time', itemprop= 'datePublished').text
+        date = soup.find('time', itemprop= 'datePublished')['content']
         if not date:
-            return ''
-        return date
+            return None
+        return parse(date[:-15])
 
     def parse_content(soup):
-        content = soup.find('div', class_= 'post-body post-body-enhanced').text
+        content = soup.find('div', class_= 'post-body post-body-enhanced')
         if not content:
             return ''
-        return content
+        return content.text
 
     soup = get_soup(url)
     return {
@@ -43,7 +64,8 @@ def parse_blog(url):
         'title': parse_title(soup),
         'date': parse_date(soup),
         'author': parse_author(soup),
-        'content': parse_content(soup)
+        'content': parse_content(soup),
+        'scraping_date': now()
     }
 
 def parse_testimony(url):
@@ -60,10 +82,10 @@ def parse_testimony(url):
         return author.text
 
     def parse_date(soup):
-        date = soup.find('time', itemprop= 'datePublished').text
+        date = soup.find('time', itemprop= 'datePublished')['content']
         if not date:
-            return ''
-        return date
+            return None
+        return parse(date[:-15])
 
     def parse_content(soup):
         p = soup.find('div', class_ = 'post-body post-body-enhanced')
@@ -77,7 +99,8 @@ def parse_testimony(url):
         'title': parse_title(soup),
         'date': parse_date(soup),
         'content': parse_content(soup),
-        'author': parse_author(soup)
+        'author': parse_author(soup),
+        'scraping_date': now()
     }
 
 
@@ -95,10 +118,10 @@ def parse_report(url):
         return author.text
 
     def parse_date(soup):
-        date = soup.find('time', itemprop= 'datePublished').text
+        date = soup.find('time', itemprop= 'datePublished')['content']
         if not date:
-            return ''
-        return date
+            return None
+        return parse(date[:-15])
 
     def parse_publication_link(soup):
         for a in soup.select('a'):
@@ -107,10 +130,10 @@ def parse_report(url):
         return ''
 
     def parse_content(soup):
-        content = soup.find('div', class_= 'post-body post-body-enhanced').text
+        content = soup.find('div', class_= 'post-body post-body-enhanced')
         if not content:
             return ''
-        return content
+        return content.text
 
     soup = get_soup(url)
     content_url = parse_publication_link(soup)
@@ -120,7 +143,8 @@ def parse_report(url):
         'title': parse_title(soup),
         'date': parse_date(soup),
         'content_url': content_url,
-        'content': parse_content(soup)
+        'content': parse_content(soup),
+        'scraping_date': now()
     }
 
 def parse_bpea(url):
@@ -137,10 +161,10 @@ def parse_bpea(url):
         return author.text
 
     def parse_date(soup):
-        date = soup.find('time', itemprop= 'datePublished').text
+        date = soup.find('time', itemprop= 'datePublished')['content']
         if not date:
-            return ''
-        return date
+            return None
+        return parse(date[:-15])
 
     def parse_publication_link(soup):
         for a in soup.select('a'):
@@ -148,10 +172,10 @@ def parse_bpea(url):
                 return a.attrs['href']
         return ''
     def parse_content(soup):
-        content = soup.find('div', class_= 'post-body post-body-enhanced').text
+        content = soup.find('div', class_= 'post-body post-body-enhanced')
         if not content:
             return ''
-        return content
+        return content.text
 
     soup = get_soup(url)
     content_url = parse_publication_link(soup)
@@ -161,5 +185,6 @@ def parse_bpea(url):
         'title': parse_title(soup),
         'date': parse_date(soup),
         'content_url': content_url,
-        'content': parse_content(soup)
+        'content': parse_content(soup),
+        'scraping_date': now()
     }
